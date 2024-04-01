@@ -19,6 +19,15 @@ enum Gender {
   FEMALE
 }
 
+enum TournamentType {
+  AMERICANO
+  AMERICANO_TEAMS
+  AMERICANO_MIXED
+  MEXICANO
+  MEXICANO_TEAMS
+  MEXICANO_MIXED
+}
+
 model Player {
   id           String     @id @default(uuid())
   name         String
@@ -53,12 +62,13 @@ model Match {
 }
 
 model Tournament {
-  id         String   @id @default(uuid())
+  id         String         @id @default(uuid())
   name       String
-  createdAt  DateTime @default(now())
+  createdAt  DateTime       @default(now())
   players    Player[]
   Matches    Match[]
   ownerEmail String
+  type       TournamentType
 
   @@unique([ownerEmail, id])
 }
