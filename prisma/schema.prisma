@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+model Player {
+  id           String     @id @default(uuid())
+  name         String
+  gender       Gender     @default(MALE)
+  score        Int        @default(0)
+  tournamentId String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+  Team         Team[]     @relation("playerA1")
+  TeamB        Team[]     @relation("playerA2")
+}
+
+model Team {
+  id            String  @id @default(uuid())
+  player1Id     String
+  player1       Player  @relation("playerA1", fields: [player1Id], references: [id])
+  player2Id     String
+  player2       Player  @relation("playerA2", fields: [player2Id], references: [id])
+  score         Int     @default(0)
+  MatchesWhereA Match[] @relation("MatchA")
+  MatchesWhereB Match[] @relation("MatchB")
+}
+
+model Match {
+  id           String     @id @default(uuid())
+  teamAId      String
+  teamA        Team       @relation("MatchA", fields: [teamAId], references: [id])
+  teamBId      String
+  teamB        Team       @relation("MatchB", fields: [teamBId], references: [id])
+  tournamentId String
+  round        String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+}
+
+model Tournament {
+  id         String   @id @default(uuid())
+  name       String
+  createdAt  DateTime @default(now())
+  players    Player[]
+  Matches    Match[]
+  ownerEmail String
+
+  @@unique([ownerEmail, id])
+}
